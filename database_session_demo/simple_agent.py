@@ -1,12 +1,12 @@
 """
-Simple Agent with Database Session Service Demo
+Database Session Service Demo
 
 This demonstrates how to use Google ADK's DatabaseSessionService
 with PostgreSQL to persist conversation sessions.
 """
 
 import asyncio
-from google.adk.sessions import DatabaseSessionService, InMemorySessionService
+from google.adk.sessions import DatabaseSessionService
 from google.adk.agents import LlmAgent
 from google.adk.tools import FunctionTool
 from google.adk.runners import Runner
@@ -17,22 +17,10 @@ from config import DATABASE_URL, APP_NAME
 class SimpleChatAgent:
     """A minimal agent that demonstrates database session persistence."""
     
-    def __init__(self, use_database=True):
-        """
-        Initialize the agent with either database or in-memory session service.
-        
-        Args:
-            use_database: If True, use DatabaseSessionService with PostgreSQL.
-                         If False, use InMemorySessionService for comparison.
-        """
-        self.use_database = use_database
-        
-        if use_database:
-            print(f"🔗 Connecting to PostgreSQL: {DATABASE_URL}")
-            self.session_service = DatabaseSessionService(db_url=DATABASE_URL)
-        else:
-            print("🧠 Using in-memory session service (data will be lost on restart)")
-            self.session_service = InMemorySessionService()
+    def __init__(self):
+        """Initialize the agent with database session service."""
+        print(f"🔗 Connecting to PostgreSQL: {DATABASE_URL}")
+        self.session_service = DatabaseSessionService(db_url=DATABASE_URL)
         
         # Create a simple function tool for demonstration
         self.tools = [
@@ -160,71 +148,50 @@ class SimpleChatAgent:
 
 
 async def demo_persistence():
-    """Demonstrate session persistence by comparing database vs in-memory."""
+    """Demonstrate database session persistence."""
     print("=" * 60)
     print("DATABASE SESSION SERVICE DEMO")
     print("=" * 60)
+    print("This demo shows how conversations persist across application restarts!")
     
     user_id = "demo_user"
     
-    # First, demonstrate database persistence
-    print("\n1️⃣ DATABASE SESSION SERVICE (Persistent)")
-    print("-" * 40)
-    
-    db_agent = SimpleChatAgent(use_database=True)
+    print("\n🚀 Starting conversation with database session service...")
+    agent = SimpleChatAgent()
     
     # Start conversation
-    session = await db_agent.start_conversation(
+    session = await agent.start_conversation(
         user_id, 
         "Hello! My name is Alice and I'm testing session persistence."
     )
     
     # Send a few messages
-    await db_agent.send_message(session.id, user_id, "What time is it?")
-    await db_agent.send_message(session.id, user_id, "Can you remember my name?")
+    await agent.send_message(session.id, user_id, "What time is it?")
+    await agent.send_message(session.id, user_id, "Can you remember my name?")
     
     # List sessions
-    await db_agent.list_sessions(user_id)
+    await agent.list_sessions(user_id)
     
     # Now create a new agent instance (simulating app restart)
     print("\n🔄 Simulating application restart...")
-    db_agent2 = SimpleChatAgent(use_database=True)
+    print("(In a real application, this would be a server restart)")
+    agent2 = SimpleChatAgent()
     
     # The session should still be there!
-    await db_agent2.list_sessions(user_id)
+    print("\n✅ Checking if sessions survived the restart...")
+    await agent2.list_sessions(user_id)
     
     # Continue the conversation
-    await db_agent2.send_message(session.id, user_id, "I'm back! Do you remember our conversation?")
-    
-    # Now demonstrate in-memory (for comparison)
-    print("\n\n2️⃣ IN-MEMORY SESSION SERVICE (Non-persistent)")
-    print("-" * 40)
-    
-    memory_agent = SimpleChatAgent(use_database=False)
-    
-    # Start conversation
-    memory_session = await memory_agent.start_conversation(
-        user_id, 
-        "Hello! This is a test of in-memory sessions."
-    )
-    
-    await memory_agent.send_message(memory_session.id, user_id, "What time is it?")
-    
-    # Simulate restart
-    print("\n🔄 Simulating application restart...")
-    memory_agent2 = SimpleChatAgent(use_database=False)
-    
-    # Sessions are gone!
-    await memory_agent2.list_sessions(user_id)
+    await agent2.send_message(session.id, user_id, "I'm back! Do you remember our conversation?")
     
     print("\n" + "=" * 60)
     print("DEMO COMPLETE!")
     print("=" * 60)
     print("Key takeaways:")
     print("• DatabaseSessionService persists data across restarts")
-    print("• InMemorySessionService loses data on restart")
     print("• Sessions maintain conversation history and state")
     print("• Perfect for production applications!")
+    print("• PostgreSQL stores all session data reliably")
 
 
 if __name__ == "__main__":

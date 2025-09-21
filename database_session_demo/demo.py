@@ -2,7 +2,7 @@
 Interactive Demo Script for Database Session Service
 
 This script provides an interactive way to test the database session service
-with different scenarios.
+with PostgreSQL persistence.
 """
 
 import asyncio
@@ -14,9 +14,10 @@ async def interactive_demo():
     """Interactive demo where users can test session persistence."""
     print("🎯 Interactive Database Session Service Demo")
     print("=" * 50)
+    print("Learn how database sessions persist across application restarts!")
     
     # Initialize agent
-    agent = SimpleChatAgent(use_database=True)
+    agent = SimpleChatAgent()
     
     while True:
         print("\n📋 Choose an option:")
@@ -101,14 +102,15 @@ async def list_sessions(agent):
 
 async def test_persistence():
     """Test persistence by creating agent, adding data, then restarting."""
-    print("\n🧪 Testing Session Persistence")
-    print("-" * 30)
+    print("\n🧪 Testing Database Session Persistence")
+    print("-" * 40)
+    print("This test simulates an application restart to show data persistence")
     
     user_id = "persistence_test_user"
     
     # Create first agent instance
-    print("1️⃣ Creating first agent instance...")
-    agent1 = SimpleChatAgent(use_database=True)
+    print("\n1️⃣ Creating first agent instance...")
+    agent1 = SimpleChatAgent()
     
     # Start conversation and add some data
     session = await agent1.start_conversation(user_id, "This is a persistence test!")
@@ -121,7 +123,8 @@ async def test_persistence():
     
     # Simulate restart by creating new agent instance
     print("\n🔄 Simulating application restart...")
-    agent2 = SimpleChatAgent(use_database=True)
+    print("(In production, this would be a server restart or deployment)")
+    agent2 = SimpleChatAgent()
     
     # Check if sessions are still there
     print("\n📋 Sessions after 'restart':")
@@ -129,11 +132,13 @@ async def test_persistence():
     
     if sessions:
         print("✅ SUCCESS! Sessions persisted across restart!")
+        print("   This proves that PostgreSQL is storing the session data reliably.")
         
         # Continue the conversation
         await agent2.send_message(session.id, user_id, "Do you remember our previous conversation?")
     else:
         print("❌ FAILED! Sessions were lost.")
+        print("   This would indicate a database connection issue.")
 
 
 async def cleanup_session(agent):
@@ -163,8 +168,8 @@ async def cleanup_session(agent):
 
 async def quick_demo():
     """Run a quick automated demo."""
-    print("🚀 Running Quick Demo...")
-    print("=" * 30)
+    print("🚀 Running Quick Database Session Demo...")
+    print("=" * 40)
     
     from simple_agent import demo_persistence
     await demo_persistence()
@@ -182,6 +187,7 @@ def main():
         except Exception as e:
             print(f"\n❌ Error: {e}")
             print("Make sure PostgreSQL is running with: docker compose up -d")
+            print("This demo requires PostgreSQL to store session data.")
 
 
 if __name__ == "__main__":

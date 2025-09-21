@@ -1,12 +1,13 @@
 #!/bin/bash
 
 # Database Session Service Demo Runner
-# This script sets up and runs the demo in Docker
+# Simple setup and demo runner for learning database sessions
 
 set -e  # Exit on any error
 
-echo "🎯 Database Session Service Demo (Docker)"
-echo "=========================================="
+echo "🎯 Database Session Service Demo"
+echo "================================"
+echo "Learn how database sessions persist across application restarts!"
 
 # Check if Docker is running
 if ! docker info > /dev/null 2>&1; then
@@ -74,21 +75,22 @@ docker compose ps
 
 echo ""
 echo "🎮 Demo Options:"
-echo "1. Run interactive demo in container"
-echo "2. Run automated demo in container"
+echo "1. Run interactive demo (recommended for learning)"
+echo "2. Run automated demo (quick overview)"
 echo "3. Access container shell for manual testing"
-echo "4. View service logs"
-echo "5. Stop all services"
+echo "4. Stop all services"
 
-read -p "Enter choice (1-5): " choice
+read -p "Enter choice (1-4): " choice
 
 case $choice in
     1)
-        echo "🚀 Starting interactive demo in container..."
+        echo "🚀 Starting interactive demo..."
+        echo "This will let you test session persistence step by step!"
         docker compose exec app python demo.py
         ;;
     2)
-        echo "🚀 Starting automated demo in container..."
+        echo "🚀 Starting automated demo..."
+        echo "This will run a quick demonstration of persistence!"
         docker compose exec app python demo.py quick
         ;;
     3)
@@ -97,10 +99,6 @@ case $choice in
         docker compose exec app /bin/bash
         ;;
     4)
-        echo "📋 Showing service logs..."
-        docker compose logs -f
-        ;;
-    5)
         echo "🛑 Stopping all services..."
         docker compose down
         echo "✅ Services stopped"
@@ -114,10 +112,13 @@ esac
 echo ""
 echo "🎉 Demo session completed!"
 echo ""
-echo "📋 Useful Docker commands:"
-echo "• View logs: docker compose logs [service_name]"
-echo "• Connect to database: docker compose exec db psql -U agent_user -d agent_sessions"
-echo "• Access PgAdmin: http://127.0.0.1:8080 (admin@demo.com / admin123)"
+echo "📋 Key Takeaways:"
+echo "• Database sessions persist across application restarts"
+echo "• PostgreSQL stores conversation history and state reliably"
+echo "• Perfect for production applications!"
+echo ""
+echo "📋 Useful commands:"
+echo "• View logs: docker compose logs"
 echo "• Container shell: docker compose exec app /bin/bash"
 echo "• Stop services: docker compose down"
 echo "• Clean up everything: docker compose down -v"
