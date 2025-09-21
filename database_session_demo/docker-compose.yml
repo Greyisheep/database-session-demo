@@ -1,0 +1,73 @@
+services:
+  db:
+    container_name: demo_postgres_db
+    image: postgres:17-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: agent_sessions
+      POSTGRES_USER: agent_user
+      POSTGRES_PASSWORD: agent_password
+    networks:
+      - demo_network
+    ports:
+      - 127.0.0.1:5432:5432
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U agent_user -d agent_sessions",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    container_name: demo_python_app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgresql://agent_user:agent_password@db:5432/agent_sessions
+      APP_NAME: demo_agent
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY}
+      GOOGLE_MODEL_NAME: ${GOOGLE_MODEL_NAME:-gemini-2.5-pro}
+    ports:
+      - 127.0.0.1:8000:8000
+    networks:
+      - demo_network
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    stdin_open: true
+    tty: true
+
+  pgadmin:
+    container_name: demo_pgadmin
+    image: dpage/pgadmin4:8.12
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@demo.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - 127.0.0.1:8080:80
+    networks:
+      - demo_network
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+networks:
+  demo_network:
+    name: demo_network
+    driver: bridge
+
+volumes:
+  postgres_data:
+  pgadmin_data:

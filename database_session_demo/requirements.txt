@@ -1,0 +1,3 @@
+google-adk
+psycopg2-binary
+python-dotenv
