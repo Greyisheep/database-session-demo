@@ -45,6 +45,8 @@ services:
       - .:/app
     stdin_open: true
     tty: true
+    # Default command can be overridden when running specific scripts
+    # command: ["python", "api_server.py"]  # Uncomment to run API server by default
 
   pgadmin:
     container_name: demo_pgadmin

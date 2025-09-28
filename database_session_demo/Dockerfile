@@ -28,4 +28,4 @@ RUN chown -R appuser:appgroup /app
 USER appuser
 
 # Default command (can be overridden)
-CMD ["python", "demo.py"]
+CMD ["python", "api_server.py"]
